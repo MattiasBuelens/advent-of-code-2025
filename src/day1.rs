@@ -33,11 +33,15 @@ impl Dial {
         self.0 == 0
     }
 
-    fn rotate(&mut self, rotation: Rotation) {
+    fn rotate_part1(&mut self, rotation: Rotation, zeros: &mut usize) {
         self.0 = match rotation {
             Rotation::L(amount) => self.0 - amount,
             Rotation::R(amount) => self.0 + amount,
-        } % 100;
+        }
+        .rem_euclid(100);
+        if self.is_zero() {
+            *zeros += 1;
+        }
     }
 }
 
@@ -46,17 +50,42 @@ fn part1(input: &[Rotation]) -> usize {
     let mut dial = Dial(50);
     let mut zero_times = 0usize;
     for &rotation in input {
-        dial.rotate(rotation);
-        if dial.is_zero() {
-            zero_times += 1;
-        }
+        dial.rotate_part1(rotation, &mut zero_times);
     }
     zero_times
 }
 
+impl Dial {
+    fn rotate_part2(&mut self, rotation: Rotation, clicks: &mut usize) {
+        match rotation {
+            Rotation::L(amount) => {
+                for _ in 0..amount {
+                    self.0 = (self.0 - 1).rem_euclid(100);
+                    if self.is_zero() {
+                        *clicks += 1;
+                    }
+                }
+            }
+            Rotation::R(amount) => {
+                for _ in 0..amount {
+                    self.0 = (self.0 + 1).rem_euclid(100);
+                    if self.is_zero() {
+                        *clicks += 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[aoc(day1, part2)]
 fn part2(input: &[Rotation]) -> usize {
-    todo!()
+    let mut dial = Dial(50);
+    let mut clicks = 0usize;
+    for &rotation in input {
+        dial.rotate_part2(rotation, &mut clicks);
+    }
+    clicks
 }
 
 #[cfg(test)]
@@ -81,6 +110,11 @@ L82";
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 0);
+        assert_eq!(part2(&parse(EXAMPLE)), 6);
+    }
+
+    #[test]
+    fn part2_r1000() {
+        assert_eq!(part2(&[Rotation::R(1000)]), 10);
     }
 }
