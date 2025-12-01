@@ -64,9 +64,12 @@ impl Dial {
         *clicks += amount / 100;
         let amount = amount % 100;
         for _ in 0..amount {
-            self.0 = (self.0 + step).rem_euclid(100);
-            if self.is_zero() {
-                *clicks += 1;
+            self.0 = match self.0 + step {
+                0 | 100 | -100 => {
+                    *clicks += 1;
+                    0
+                }
+                x => x
             }
         }
     }
