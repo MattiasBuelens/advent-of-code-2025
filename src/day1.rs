@@ -59,6 +59,8 @@ impl Dial {
     fn rotate_part2(&mut self, rotation: Rotation, clicks: &mut usize) {
         match rotation {
             Rotation::L(amount) => {
+                *clicks += (amount as usize) / 100;
+                let amount = amount % 100;
                 for _ in 0..amount {
                     self.0 = (self.0 - 1).rem_euclid(100);
                     if self.is_zero() {
@@ -67,6 +69,8 @@ impl Dial {
                 }
             }
             Rotation::R(amount) => {
+                *clicks += (amount as usize) / 100;
+                let amount = amount % 100;
                 for _ in 0..amount {
                     self.0 = (self.0 + 1).rem_euclid(100);
                     if self.is_zero() {
