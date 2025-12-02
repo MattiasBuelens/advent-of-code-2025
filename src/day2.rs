@@ -1,4 +1,5 @@
 use aoc_runner_derive::{aoc, aoc_generator};
+use itertools::Itertools;
 
 struct Range {
     start: u64,
@@ -29,7 +30,7 @@ fn to_digits(mut n: u64) -> Vec<u8> {
     digits
 }
 
-fn is_invalid(id: u64) -> bool {
+fn is_invalid_part1(id: u64) -> bool {
     let digits = to_digits(id);
     if !digits.len().is_multiple_of(2) {
         return false;
@@ -43,13 +44,28 @@ fn part1(input: &[Range]) -> u64 {
     input
         .iter()
         .flat_map(|range| range.start..=range.end)
-        .filter(|&id| is_invalid(id))
+        .filter(|&id| is_invalid_part1(id))
         .sum()
+}
+
+fn is_invalid_part2(id: u64) -> bool {
+    let digits = to_digits(id);
+    for chunk_size in 1..=(digits.len() / 2) {
+        let mut chunks = digits.as_slice().chunks_exact(chunk_size);
+        if chunks.remainder().is_empty() && chunks.all_equal() {
+            return true;
+        }
+    }
+    false
 }
 
 #[aoc(day2, part2)]
 fn part2(input: &[Range]) -> u64 {
-    todo!()
+    input
+        .iter()
+        .flat_map(|range| range.start..=range.end)
+        .filter(|&id| is_invalid_part2(id))
+        .sum()
 }
 
 #[cfg(test)]
@@ -65,16 +81,29 @@ mod tests {
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 0);
+        assert_eq!(part2(&parse(EXAMPLE)), 4174379265);
     }
 
     #[test]
-    fn test_is_invalid() {
-        assert!(is_invalid(55));
-        assert!(is_invalid(6464));
-        assert!(is_invalid(123123));
+    fn test_is_invalid_part1() {
+        assert!(is_invalid_part1(55));
+        assert!(is_invalid_part1(6464));
+        assert!(is_invalid_part1(123123));
 
-        assert!(!is_invalid(12));
-        assert!(!is_invalid(56));
+        assert!(!is_invalid_part1(12));
+        assert!(!is_invalid_part1(56));
+    }
+
+    #[test]
+    fn test_is_invalid_part2() {
+        assert!(is_invalid_part2(12341234));
+        assert!(is_invalid_part2(123123123));
+        assert!(is_invalid_part2(1212121212));
+        assert!(is_invalid_part2(1111111));
+        assert!(is_invalid_part2(1188511885));
+
+        assert!(!is_invalid_part1(12));
+        assert!(!is_invalid_part1(56));
+        assert!(!is_invalid_part1(112211));
     }
 }
