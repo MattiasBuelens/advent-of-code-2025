@@ -69,7 +69,7 @@ impl Dial {
                     *clicks += 1;
                     0
                 }
-                x => x
+                x => x,
             }
         }
     }
