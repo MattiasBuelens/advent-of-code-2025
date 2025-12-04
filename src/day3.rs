@@ -13,7 +13,7 @@ fn parse(input: &str) -> Vec<Bank> {
     input.lines().map(parse_bank).collect()
 }
 
-fn max_joltage(bank: &[u8], num_batteries: usize) -> u64 {
+fn max_joltage(bank: &Bank, num_batteries: usize) -> u64 {
     let mut joltage = 0;
     let mut start_idx = 0usize;
     for num_battery in (0..num_batteries).rev() {
@@ -22,7 +22,7 @@ fn max_joltage(bank: &[u8], num_batteries: usize) -> u64 {
             .copied()
             .enumerate()
             .skip(start_idx)
-            .max_by(|(i1, b1), (i2, b2)| b1.cmp(&b2).then_with(|| i2.cmp(i1)))
+            .max_by(|(i1, b1), (i2, b2)| b1.cmp(b2).then_with(|| i2.cmp(i1)))
             .unwrap();
         joltage += (battery as u64) * 10u64.pow(num_battery as u32);
         start_idx = idx + 1;
@@ -61,22 +61,10 @@ mod tests {
 
     #[test]
     fn test_max_joltage_part1() {
-        assert_eq!(
-            max_joltage(&parse_bank("987654321111111"), 2),
-            98
-        );
-        assert_eq!(
-            max_joltage(&parse_bank("811111111111119"), 2),
-            89
-        );
-        assert_eq!(
-            max_joltage(&parse_bank("234234234234278"), 2),
-            78
-        );
-        assert_eq!(
-            max_joltage(&parse_bank("818181911112111"), 2),
-            92
-        );
+        assert_eq!(max_joltage(&parse_bank("987654321111111"), 2), 98);
+        assert_eq!(max_joltage(&parse_bank("811111111111119"), 2), 89);
+        assert_eq!(max_joltage(&parse_bank("234234234234278"), 2), 78);
+        assert_eq!(max_joltage(&parse_bank("818181911112111"), 2), 92);
     }
 
     #[test]
