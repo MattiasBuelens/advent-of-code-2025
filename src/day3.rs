@@ -1,5 +1,4 @@
 use aoc_runner_derive::{aoc, aoc_generator};
-use std::cmp::max;
 
 type Bank = Vec<u8>;
 
@@ -34,28 +33,21 @@ fn part1(input: &[Bank]) -> u64 {
         .sum()
 }
 
-fn max_joltage_part2(bank: &[u8], len: usize) -> u64 {
-    debug_assert!(len > 2);
-    let mut max_joltages: Vec<Vec<u64>> = Vec::with_capacity(len + 1);
-    // Ignore len = 0
-    max_joltages.push(Vec::new());
-    // With len = 1, the maximum joltage is just the battery's value
-    max_joltages.push(bank.iter().map(|&x| x as u64).collect());
-    let mut shift = 10;
-    for len in 2..=len {
-        max_joltages.push(vec![0u64; bank.len()]);
-        for (i, &battery) in bank.iter().enumerate().rev().skip(len - 1) {
-            // Two options:
-            // - Take this battery and add the max joltage at i+1 of the previous length
-            // - Skip this battery and use the max joltage at i+1 of the current length
-            max_joltages[len][i] = max(
-                max_joltages[len - 1][i + 1] + (battery as u64 * shift),
-                max_joltages[len][i + 1],
-            );
-        }
-        shift *= 10;
+fn max_joltage_part2(bank: &[u8], num_batteries: usize) -> u64 {
+    let mut joltage = 0;
+    let mut start_idx = 0usize;
+    for num_battery in (0..num_batteries).rev() {
+        let (idx, battery) = bank[..(bank.len() - num_battery)]
+            .iter()
+            .copied()
+            .enumerate()
+            .skip(start_idx)
+            .max_by(|(i1, b1), (i2, b2)| b1.cmp(&b2).then_with(|| i2.cmp(i1)))
+            .unwrap();
+        joltage += (battery as u64) * 10u64.pow(num_battery as u32);
+        start_idx = idx + 1;
     }
-    max_joltages[len].iter().copied().max().unwrap()
+    joltage
 }
 
 #[aoc(day3, part2)]
