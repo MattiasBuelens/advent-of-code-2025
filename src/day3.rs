@@ -60,6 +60,26 @@ mod tests {
     }
 
     #[test]
+    fn test_max_joltage_part1() {
+        assert_eq!(
+            max_joltage(&parse_bank("987654321111111"), 2),
+            98
+        );
+        assert_eq!(
+            max_joltage(&parse_bank("811111111111119"), 2),
+            89
+        );
+        assert_eq!(
+            max_joltage(&parse_bank("234234234234278"), 2),
+            78
+        );
+        assert_eq!(
+            max_joltage(&parse_bank("818181911112111"), 2),
+            92
+        );
+    }
+
+    #[test]
     fn test_max_joltage_part2() {
         assert_eq!(
             max_joltage(&parse_bank("987654321111111"), 12),
