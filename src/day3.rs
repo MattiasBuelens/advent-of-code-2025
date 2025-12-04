@@ -25,14 +25,6 @@ fn max_joltage_part1(bank: &[u8]) -> u8 {
         .unwrap()
 }
 
-#[aoc(day3, part1)]
-fn part1(input: &[Bank]) -> u64 {
-    input
-        .iter()
-        .map(|bank| max_joltage_part1(bank) as u64)
-        .sum()
-}
-
 fn max_joltage_part2(bank: &[u8], num_batteries: usize) -> u64 {
     let mut joltage = 0;
     let mut start_idx = 0usize;
@@ -48,6 +40,14 @@ fn max_joltage_part2(bank: &[u8], num_batteries: usize) -> u64 {
         start_idx = idx + 1;
     }
     joltage
+}
+
+#[aoc(day3, part1)]
+fn part1(input: &[Bank]) -> u64 {
+    input
+        .iter()
+        .map(|bank| max_joltage_part1(bank) as u64)
+        .sum()
 }
 
 #[aoc(day3, part2)]
