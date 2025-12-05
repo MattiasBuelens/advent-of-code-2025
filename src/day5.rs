@@ -44,9 +44,52 @@ fn part1(inventory: &Inventory) -> usize {
         .count()
 }
 
+impl Inventory {
+    fn normalize_ranges(&mut self) {
+        // Inspired by TimeRanges::Normalize() from Mozilla Firefox
+        // https://searchfox.org/firefox-main/rev/39bc83bb8632d54d70542dc5d98c046a317ec99d/dom/media/mediaelement/TimeRanges.cpp#107
+        if self.fresh_ranges.len() < 2 {
+            return;
+        }
+        // Sort ranges
+        self.fresh_ranges.sort_by(|left, right| {
+            left.start()
+                .cmp(right.start())
+                .then_with(|| left.end().cmp(right.end()))
+        });
+        // Merge consecutive ranges
+        let mut ranges = Vec::with_capacity(self.fresh_ranges.len());
+        let mut current_range = self.fresh_ranges[0].clone();
+        for range in &self.fresh_ranges[1..] {
+            if current_range.start() <= range.start() && range.end() <= current_range.end() {
+                // New range is fully contained in current range, skip it.
+                continue;
+            } else if current_range.end() >= range.start() {
+                // Consecutive or overlapping range.
+                current_range = (*current_range.start())..=(*range.end());
+            } else {
+                // Separate range.
+                ranges.push(current_range);
+                current_range = range.clone();
+            }
+        }
+        ranges.push(current_range);
+        self.fresh_ranges = ranges;
+    }
+
+    fn count_fresh(&self) -> usize {
+        self.fresh_ranges
+            .iter()
+            .map(|range| range.clone().count())
+            .sum()
+    }
+}
+
 #[aoc(day5, part2)]
 fn part2(inventory: &Inventory) -> usize {
-    todo!()
+    let mut inventory = inventory.clone();
+    inventory.normalize_ranges();
+    inventory.count_fresh()
 }
 
 #[cfg(test)]
@@ -72,6 +115,6 @@ mod tests {
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 0);
+        assert_eq!(part2(&parse(EXAMPLE)), 14);
     }
 }
