@@ -13,8 +13,7 @@ struct Problem {
     op: Op,
 }
 
-#[aoc_generator(day6)]
-fn parse(input: &str) -> Vec<Problem> {
+fn parse_part1(input: &str) -> Vec<Problem> {
     let mut problems = Vec::new();
     for line in input.lines() {
         for (i, s) in line.split_ascii_whitespace().enumerate() {
@@ -42,13 +41,19 @@ impl Problem {
 }
 
 #[aoc(day6, part1)]
-fn part1(problems: &[Problem]) -> u64 {
+fn part1(input: &str) -> u64 {
+    let problems = parse_part1(input);
     problems.iter().map(|p| p.solve()).sum()
 }
 
-#[aoc(day6, part2)]
-fn part2(problems: &[Problem]) -> u64 {
+fn parse_part2(input: &str) -> Vec<Problem> {
     todo!()
+}
+
+#[aoc(day6, part2)]
+fn part2(input: &str) -> u64 {
+    let problems = parse_part2(input);
+    problems.iter().map(|p| p.solve()).sum()
 }
 
 #[cfg(test)]
@@ -62,11 +67,11 @@ mod tests {
 
     #[test]
     fn part1_example() {
-        assert_eq!(part1(&parse(EXAMPLE)), 4277556);
+        assert_eq!(part1(EXAMPLE), 4277556);
     }
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 0);
+        assert_eq!(part2(EXAMPLE), 3263827);
     }
 }
