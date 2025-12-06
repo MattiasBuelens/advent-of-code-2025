@@ -1,4 +1,4 @@
-use aoc_runner_derive::{aoc, aoc_generator};
+use aoc_runner_derive::aoc;
 
 #[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
 enum Op {
@@ -47,7 +47,45 @@ fn part1(input: &str) -> u64 {
 }
 
 fn parse_part2(input: &str) -> Vec<Problem> {
-    todo!()
+    let mut line_iters = input
+        .lines()
+        .map(|line| line.chars().rev())
+        .collect::<Vec<_>>();
+    let mut problems = Vec::new();
+    let mut problem = Problem::default();
+    'outer: loop {
+        let column = line_iters
+            .iter_mut()
+            .filter_map(|i| i.next())
+            .collect::<Vec<_>>();
+        if column.is_empty() {
+            // End of input
+            break;
+        }
+        if column.iter().all(|&c| c == ' ') {
+            // Blank column between problems
+            continue;
+        }
+        let mut num = 0u64;
+        for c in column {
+            match c {
+                '+' | '*' => {
+                    problem.operands.push(num);
+                    problem.op = if c == '+' { Op::Add } else { Op::Multiply };
+                    problems.push(problem);
+                    problem = Problem::default();
+                    continue 'outer;
+                }
+                c if c.is_ascii_digit() => {
+                    num = num * 10 + (c.to_digit(10).unwrap() as u64);
+                }
+                ' ' => continue,
+                c => panic!("invalid character {c}"),
+            }
+        }
+        problem.operands.push(num);
+    }
+    problems
 }
 
 #[aoc(day6, part2)]
@@ -60,9 +98,9 @@ fn part2(input: &str) -> u64 {
 mod tests {
     use super::*;
 
-    static EXAMPLE: &str = r"123 328  51 64
- 45 64  387 23
-  6 98  215 314
+    static EXAMPLE: &str = "123 328  51 64 \n
+ 45 64  387 23 \n
+  6 98  215 314\n
 *   +   *   +  ";
 
     #[test]
