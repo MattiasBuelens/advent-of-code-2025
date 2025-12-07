@@ -1,5 +1,7 @@
 use crate::util::Vector2D;
 use aoc_runner_derive::{aoc, aoc_generator};
+use itertools::Either;
+use pathfinding::directed::count_paths::count_paths;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
@@ -61,7 +63,17 @@ fn part1(manifold: &Manifold) -> usize {
 
 #[aoc(day7, part2)]
 fn part2(manifold: &Manifold) -> usize {
-    todo!()
+    count_paths(
+        manifold.start,
+        |&pos| {
+            if manifold.splitters.contains(&pos) {
+                Either::Left([pos + Vector2D::new(-1, 0), pos + Vector2D::new(1, 0)].into_iter())
+            } else {
+                Either::Right([pos + Vector2D::new(0, 1)].into_iter())
+            }
+        },
+        |pos| pos.y() == manifold.height,
+    )
 }
 
 #[cfg(test)]
@@ -77,6 +89,6 @@ mod tests {
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 0);
+        assert_eq!(part2(&parse(EXAMPLE)), 40);
     }
 }
