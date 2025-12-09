@@ -80,6 +80,12 @@ impl<const N: usize, T: Num> Vector<N, T> {
         product
     }
 
+    #[inline]
+    pub fn euclidean_distance_squared(&self, other: &Self) -> T {
+        let difference = *self - *other;
+        difference.dot_product(difference)
+    }
+
     pub fn to_f64(self) -> Vector<N, f64> {
         self.map(|x| x.as_())
     }
