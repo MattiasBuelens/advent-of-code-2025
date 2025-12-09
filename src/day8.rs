@@ -18,14 +18,20 @@ fn parse(input: &str) -> Vec<Vector3D<i64>> {
         .collect()
 }
 
-fn connect(boxes: &[Vector3D<i64>], num_connections: usize) -> usize {
-    let mut links = DisjointSet::with_len(boxes.len());
-    let pairs = boxes
+fn get_pairs(
+    boxes: &[Vector3D<i64>],
+) -> impl Iterator<Item = ((usize, Vector3D<i64>), (usize, Vector3D<i64>))> + '_ {
+    boxes
         .iter()
+        .copied()
         .enumerate()
         .tuple_combinations::<(_, _)>()
         .sorted_by_key(|((_, a), (_, b))| a.euclidean_distance_squared(b))
-        .take(num_connections);
+}
+
+fn connect(boxes: &[Vector3D<i64>], num_connections: usize) -> usize {
+    let mut links = DisjointSet::with_len(boxes.len());
+    let pairs = get_pairs(boxes).take(num_connections);
     for ((i, _), (j, _)) in pairs {
         links.join(i, j);
     }
