@@ -2,6 +2,7 @@ use crate::util::Vector3D;
 use aoc_runner_derive::{aoc, aoc_generator};
 use disjoint::DisjointSet;
 use itertools::Itertools;
+use std::cmp::Reverse;
 
 #[aoc_generator(day8)]
 fn parse(input: &str) -> Vec<Vector3D> {
@@ -29,8 +30,8 @@ fn connect(boxes: &[Vector3D], num_connections: usize) -> usize {
         links.join(i, j);
     }
     let mut sets = links.sets();
-    sets.sort_by_key(|set| set.len());
-    let three_largest_sets = &sets[(sets.len() - 3)..];
+    sets.sort_by_key(|set| Reverse(set.len()));
+    let three_largest_sets = &sets[0..3];
     three_largest_sets.iter().map(|set| set.len()).product()
 }
 
