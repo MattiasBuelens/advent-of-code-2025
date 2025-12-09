@@ -19,14 +19,14 @@ fn parse(input: &str) -> Vec<Vector3D> {
 }
 
 fn connect(boxes: &[Vector3D], num_connections: usize) -> usize {
-    let mut pairs = boxes
+    let mut links = DisjointSet::with_len(boxes.len());
+    let pairs = boxes
         .iter()
         .enumerate()
         .tuple_combinations::<(_, _)>()
-        .collect::<Vec<_>>();
-    pairs.sort_by_key(|((_, a), (_, b))| a.euclidean_distance_squared(b));
-    let mut links = DisjointSet::with_len(boxes.len());
-    for ((i, _), (j, _)) in pairs.into_iter().take(num_connections) {
+        .sorted_by_key(|((_, a), (_, b))| a.euclidean_distance_squared(b))
+        .take(num_connections);
+    for ((i, _), (j, _)) in pairs {
         links.join(i, j);
     }
     let mut sets = links.sets();
