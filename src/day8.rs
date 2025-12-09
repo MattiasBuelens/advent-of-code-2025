@@ -46,9 +46,22 @@ fn part1(boxes: &[Vector3D<i64>]) -> usize {
     connect(boxes, 1000)
 }
 
+fn connect_until_single(boxes: &[Vector3D<i64>]) -> (Vector3D<i64>, Vector3D<i64>) {
+    let mut links = DisjointSet::with_len(boxes.len());
+    let pairs = get_pairs(boxes);
+    for ((i, box1), (j, box2)) in pairs {
+        links.join(i, j);
+        if (0..boxes.len()).map(|k| links.root_of(k)).all_equal() {
+            return (box1, box2);
+        }
+    }
+    panic!("no single circuit after all pairs are connected");
+}
+
 #[aoc(day8, part2)]
-fn part2(boxes: &[Vector3D<i64>]) -> usize {
-    todo!()
+fn part2(boxes: &[Vector3D<i64>]) -> i64 {
+    let (box1, box2) = connect_until_single(boxes);
+    box1.x() * box2.x()
 }
 
 #[cfg(test)]
@@ -64,6 +77,9 @@ mod tests {
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 40);
+        assert_eq!(
+            connect_until_single(&parse(EXAMPLE)),
+            (Vector3D::new(216, 146, 977), Vector3D::new(117, 168, 530))
+        );
     }
 }
