@@ -5,7 +5,7 @@ use itertools::Itertools;
 use std::cmp::Reverse;
 
 #[aoc_generator(day8)]
-fn parse(input: &str) -> Vec<Vector3D> {
+fn parse(input: &str) -> Vec<Vector3D<i64>> {
     input
         .lines()
         .map(|line| {
@@ -18,7 +18,7 @@ fn parse(input: &str) -> Vec<Vector3D> {
         .collect()
 }
 
-fn connect(boxes: &[Vector3D], num_connections: usize) -> usize {
+fn connect(boxes: &[Vector3D<i64>], num_connections: usize) -> usize {
     let mut links = DisjointSet::with_len(boxes.len());
     let pairs = boxes
         .iter()
@@ -36,12 +36,12 @@ fn connect(boxes: &[Vector3D], num_connections: usize) -> usize {
 }
 
 #[aoc(day8, part1)]
-fn part1(boxes: &[Vector3D]) -> usize {
+fn part1(boxes: &[Vector3D<i64>]) -> usize {
     connect(boxes, 1000)
 }
 
 #[aoc(day8, part2)]
-fn part2(boxes: &[Vector3D]) -> usize {
+fn part2(boxes: &[Vector3D<i64>]) -> usize {
     todo!()
 }
 
