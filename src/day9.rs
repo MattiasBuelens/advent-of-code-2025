@@ -13,16 +13,33 @@ fn parse(input: &str) -> Vec<Vector2D<i64>> {
         .collect()
 }
 
+#[derive(Debug)]
+struct Rect {
+    top_left: Vector2D<i64>,
+    bottom_right: Vector2D<i64>,
+}
+
+impl Rect {
+    fn new(first: Vector2D<i64>, second: Vector2D<i64>) -> Self {
+        Self {
+            top_left: Vector2D::new(first.x().min(second.x()), first.y().min(second.y())),
+            bottom_right: Vector2D::new(first.x().max(second.x()), first.y().max(second.y())),
+        }
+    }
+
+    fn area(&self) -> i64 {
+        let width = self.bottom_right.x() - self.top_left.x() + 1;
+        let height = self.bottom_right.y() - self.top_left.y() + 1;
+        width * height
+    }
+}
+
 #[aoc(day9, part1)]
 fn part1(input: &[Vector2D<i64>]) -> i64 {
     input
         .iter()
         .tuple_combinations::<(_, _)>()
-        .map(|(left, right)| {
-            let width = (left.x() - right.x() + 1).abs();
-            let height = (left.y() - right.y() + 1).abs();
-            width * height
-        })
+        .map(|(&left, &right)| Rect::new(left, right).area())
         .max()
         .unwrap()
 }
