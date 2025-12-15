@@ -1,9 +1,10 @@
 use aoc_runner_derive::{aoc, aoc_generator};
+use bitvec::prelude::*;
 
 #[derive(Debug, Clone)]
 struct Machine {
-    lights: Vec<bool>,
-    buttons: Vec<Vec<usize>>,
+    lights: BitVec,
+    buttons: Vec<BitVec>,
     joltages: Vec<u64>,
 }
 
@@ -14,7 +15,7 @@ fn parse(input: &str) -> Vec<Machine> {
         .map(|s| {
             let (lights, s) = s.split_once(' ').unwrap();
             let (buttons, joltages) = s.rsplit_once(' ').unwrap();
-            let lights = lights
+            let lights: BitVec = lights
                 .strip_prefix('[')
                 .unwrap()
                 .strip_suffix(']')
@@ -22,20 +23,22 @@ fn parse(input: &str) -> Vec<Machine> {
                 .chars()
                 .map(|c| c == '#')
                 .collect();
-            let buttons = buttons
+            let buttons: Vec<BitVec> = buttons
                 .split(' ')
                 .map(|button| {
+                    let mut button_mask = bitvec!(0; lights.len());
                     button
                         .strip_prefix('(')
                         .unwrap()
                         .strip_suffix(')')
                         .unwrap()
                         .split(',')
-                        .map(|n| n.parse().unwrap())
-                        .collect()
+                        .map(|n| n.parse::<usize>().unwrap())
+                        .for_each(|light_index| button_mask.set(light_index, true));
+                    button_mask
                 })
                 .collect();
-            let joltages = joltages
+            let joltages: Vec<u64> = joltages
                 .strip_prefix('{')
                 .unwrap()
                 .strip_suffix('}')
