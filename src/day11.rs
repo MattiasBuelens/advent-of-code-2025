@@ -1,6 +1,8 @@
 use aoc_runner_derive::{aoc, aoc_generator};
+use itertools::Either;
 use pathfinding::prelude::count_paths;
 use std::collections::HashMap;
+use std::iter::empty;
 
 #[derive(Debug, Clone)]
 struct Reactor {
@@ -20,18 +22,21 @@ fn parse(input: &str) -> Reactor {
     Reactor { cables }
 }
 
+impl Reactor {
+    fn connections(&self, label: &str) -> impl Iterator<Item = &str> + '_ {
+        if let Some(next) = self.cables.get(label) {
+            Either::Left(next.iter().map(String::as_str))
+        } else {
+            Either::Right(empty())
+        }
+    }
+}
+
 #[aoc(day11, part1)]
 fn part1(input: &Reactor) -> usize {
     count_paths(
         "you",
-        |&label| {
-            input
-                .cables
-                .get(label)
-                .iter()
-                .flat_map(|next| next.iter().map(String::as_str))
-                .collect::<Vec<_>>()
-        },
+        |&label| input.connections(label),
         |&label| label == "out",
     )
 }
