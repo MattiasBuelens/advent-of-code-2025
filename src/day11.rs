@@ -41,24 +41,47 @@ fn part1(input: &Reactor) -> usize {
     )
 }
 
+#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+struct State<'a> {
+    label: &'a str,
+    dac: bool,
+    fft: bool,
+}
+
 #[aoc(day11, part2)]
 fn part2(input: &Reactor) -> usize {
-    todo!()
+    count_paths(
+        State {
+            label: "svr",
+            dac: false,
+            fft: false,
+        },
+        |state| {
+            let state = state.clone();
+            input.connections(state.label).map(move |next_label| State {
+                label: next_label,
+                dac: next_label == "dac" || state.dac,
+                fft: next_label == "fft" || state.fft,
+            })
+        },
+        |state| state.label == "out" && state.dac && state.fft,
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    static EXAMPLE: &str = include_str!("../example/2025/day11.txt");
+    static EXAMPLE1: &str = include_str!("../example/2025/day11p1.txt");
+    static EXAMPLE2: &str = include_str!("../example/2025/day11p2.txt");
 
     #[test]
     fn part1_example() {
-        assert_eq!(part1(&parse(EXAMPLE)), 5);
+        assert_eq!(part1(&parse(EXAMPLE1)), 5);
     }
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 0);
+        assert_eq!(part2(&parse(EXAMPLE2)), 2);
     }
 }
