@@ -41,7 +41,7 @@ fn part1(input: &Reactor) -> usize {
     )
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 struct State<'a> {
     label: &'a str,
     dac: bool,
@@ -57,11 +57,11 @@ fn part2(input: &Reactor) -> usize {
             fft: false,
         },
         |state| {
-            let state = state.clone();
+            let (dac, fft) = (state.dac, state.fft);
             input.connections(state.label).map(move |next_label| State {
                 label: next_label,
-                dac: next_label == "dac" || state.dac,
-                fft: next_label == "fft" || state.fft,
+                dac: next_label == "dac" || dac,
+                fft: next_label == "fft" || fft,
             })
         },
         |state| state.label == "out" && state.dac && state.fft,
