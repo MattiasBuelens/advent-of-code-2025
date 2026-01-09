@@ -1,5 +1,6 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use bitvec::prelude::*;
+use nalgebra::{vector, DMatrix, DVector};
 
 #[derive(Debug, Clone)]
 struct Machine {
@@ -100,9 +101,44 @@ fn part1(input: &[Machine]) -> usize {
         .sum()
 }
 
+fn solve_joltages(machine: &Machine) -> Vec<u64> {
+    // Create a system of linear equations
+    // - Row i represents counter i
+    // - Column j represent how button j affects each counter
+    let mut a = DMatrix::<f64>::zeros(machine.joltages.len(), machine.buttons.len());
+    for (j, mut column) in a.column_iter_mut().enumerate() {
+        let button = &machine.buttons[j];
+        for i in button.iter_ones() {
+            column[i] = 1.0;
+        }
+    }
+    let mut b = DVector::<f64>::zeros(machine.joltages.len());
+    for (j, joltage) in machine.joltages.iter().copied().enumerate() {
+        b[j] = joltage as f64;
+    }
+    let x_test = vector![1.0, 3.0, 0.0, 3.0, 1.0, 2.0];
+    println!("A = {}", &a);
+    println!("b = {}", &b);
+    println!("A x x_test = {}", &a * x_test);
+    println!("rank = {}", a.rank(0.000_001));
+    // Solve the system
+    let svd = a.svd(true, true);
+    println!("SVD rank = {}", svd.rank(0.000_001));
+    println!("S = {}", &svd.singular_values);
+    println!("U = {}", svd.u.as_ref().unwrap());
+    println!("V = {}", svd.v_t.as_ref().unwrap().transpose());
+    println!("pseudo = {}", svd.clone().pseudo_inverse(0.000_001).unwrap());
+    let x = svd.solve(&b, 0.000_001).unwrap();
+    println!("{x}");
+    todo!()
+}
+
 #[aoc(day10, part2)]
 fn part2(input: &[Machine]) -> u64 {
-    todo!()
+    input
+        .iter()
+        .map(|machine| solve_joltages(machine).into_iter().sum::<u64>())
+        .sum()
 }
 
 #[cfg(test)]
@@ -122,6 +158,8 @@ mod tests {
 
     #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 0);
+        let input = parse(EXAMPLE);
+        assert_eq!(solve_joltages(&input[0]), vec![1, 3, 0, 3, 1, 2]);
+        assert_eq!(part2(&parse(EXAMPLE)), 33);
     }
 }
