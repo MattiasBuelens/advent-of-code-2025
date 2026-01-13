@@ -114,12 +114,13 @@ fn solve_joltages(machine: &Machine) -> u64 {
     }
     // Create an equation for each output joltage
     for (i, &expected_joltage) in machine.joltages.iter().enumerate() {
-        let mut joltage = Int::from_u64(0);
-        for (j, button) in machine.buttons.iter().enumerate() {
-            if button[i] {
-                joltage += &presses[j];
-            }
-        }
+        let joltage = machine
+            .buttons
+            .iter()
+            .enumerate()
+            .filter(|(_, button)| button[i])
+            .map(|(j, _)| &presses[j])
+            .sum::<Int>();
         optimizer.assert(&joltage.eq(expected_joltage))
     }
     // Find the smallest number of button presses
