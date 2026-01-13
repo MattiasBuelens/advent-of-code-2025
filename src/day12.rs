@@ -107,11 +107,6 @@ fn part1(input: &Input) -> usize {
         .count()
 }
 
-#[aoc(day12, part2)]
-fn part2(input: &Input) -> usize {
-    todo!()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

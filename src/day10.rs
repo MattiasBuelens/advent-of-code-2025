@@ -134,16 +134,7 @@ fn solve_joltages(machine: &Machine) -> u64 {
 
 #[aoc(day10, part2)]
 fn part2(input: &[Machine]) -> u64 {
-    input
-        .iter()
-        .enumerate()
-        .map(|(i, machine)| {
-            if i % 10 == 0 {
-                println!("...Machine #{i}");
-            }
-            solve_joltages(machine)
-        })
-        .sum()
+    input.iter().map(solve_joltages).sum()
 }
 
 #[cfg(test)]
