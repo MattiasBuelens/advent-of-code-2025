@@ -1,7 +1,7 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use bitvec::prelude::*;
-use z3::Solver;
 use z3::ast::Int;
+use z3::{Optimize, SatResult};
 
 #[derive(Debug, Clone)]
 struct Machine {
@@ -102,15 +102,15 @@ fn part1(input: &[Machine]) -> usize {
         .sum()
 }
 
-fn solve_joltages(machine: &Machine) -> Vec<u64> {
-    let solver = Solver::new();
+fn solve_joltages(machine: &Machine) -> u64 {
+    let optimizer = Optimize::new();
     // Create a variable for each unknown (number of button presses)
     let presses = (0..machine.buttons.len())
         .map(|_| Int::fresh_const("press"))
         .collect::<Vec<_>>();
     // Require all button presses to be positive
     for press in &presses {
-        solver.assert(press.ge(0))
+        optimizer.assert(&press.ge(0))
     }
     // Create an equation for each output joltage
     for (i, &expected_joltage) in machine.joltages.iter().enumerate() {
@@ -120,24 +120,16 @@ fn solve_joltages(machine: &Machine) -> Vec<u64> {
                 joltage += &presses[j];
             }
         }
-        solver.assert(joltage.eq(expected_joltage))
+        optimizer.assert(&joltage.eq(expected_joltage))
     }
-    // Find the smallest solution
-    let mut min_total = u64::MAX;
-    let mut best_solution = Vec::new();
-    for solution in solver.solutions(presses, true).take(100) {
-        let solution = solution
-            .iter()
-            .map(|i| i.as_u64().unwrap())
-            .collect::<Vec<_>>();
-        let total = solution.iter().sum::<u64>();
-        if total < min_total {
-            min_total = total;
-            best_solution = solution;
-        }
-    }
-    assert!(min_total < u64::MAX);
-    best_solution
+    // Find the smallest number of button presses
+    let total = presses.iter().sum::<Int>();
+    optimizer.minimize(&total);
+    let result = optimizer.check(&[]);
+    assert_eq!(result, SatResult::Sat);
+    let model = optimizer.get_model().unwrap();
+    let total_eval = model.eval(&total, true).unwrap();
+    total_eval.as_u64().unwrap()
 }
 
 #[aoc(day10, part2)]
@@ -149,7 +141,7 @@ fn part2(input: &[Machine]) -> u64 {
             if i % 10 == 0 {
                 println!("...Machine #{i}");
             }
-            solve_joltages(machine).into_iter().sum::<u64>()
+            solve_joltages(machine)
         })
         .sum()
 }
@@ -172,9 +164,9 @@ mod tests {
     #[test]
     fn part2_examples() {
         let input = parse(EXAMPLE);
-        assert_eq!(solve_joltages(&input[0]), vec![1, 3, 0, 3, 1, 2]);
-        assert_eq!(solve_joltages(&input[1]), vec![2, 5, 0, 5, 0]);
-        assert_eq!(solve_joltages(&input[2]), vec![5, 0, 5, 1]);
+        assert_eq!(solve_joltages(&input[0]), 10);
+        assert_eq!(solve_joltages(&input[1]), 12);
+        assert_eq!(solve_joltages(&input[2]), 11);
     }
 
     #[test]
