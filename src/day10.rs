@@ -1,5 +1,7 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 use bitvec::prelude::*;
+use z3::Solver;
+use z3::ast::Int;
 
 #[derive(Debug, Clone)]
 struct Machine {
@@ -100,9 +102,50 @@ fn part1(input: &[Machine]) -> usize {
         .sum()
 }
 
+fn solve_joltages(machine: &Machine) -> Vec<u64> {
+    let solver = Solver::new();
+    // Create a variable for each unknown (number of button presses)
+    let presses = (0..machine.buttons.len())
+        .map(|_| Int::fresh_const("press"))
+        .collect::<Vec<_>>();
+    // Require all button presses to be positive
+    for press in &presses {
+        solver.assert(press.ge(0))
+    }
+    // Create an equation for each output joltage
+    for (i, &expected_joltage) in machine.joltages.iter().enumerate() {
+        let mut joltage = Int::from_u64(0);
+        for (j, button) in machine.buttons.iter().enumerate() {
+            if button[i] {
+                joltage += &presses[j];
+            }
+        }
+        solver.assert(joltage.eq(expected_joltage))
+    }
+    // Find the smallest solution
+    let mut min_total = u64::MAX;
+    let mut best_solution = Vec::new();
+    for solution in solver.solutions(presses, true).take(100) {
+        let solution = solution
+            .iter()
+            .map(|i| i.as_u64().unwrap())
+            .collect::<Vec<_>>();
+        let total = solution.iter().sum::<u64>();
+        if total < min_total {
+            min_total = total;
+            best_solution = solution;
+        }
+    }
+    assert!(min_total < u64::MAX);
+    best_solution
+}
+
 #[aoc(day10, part2)]
 fn part2(input: &[Machine]) -> u64 {
-    todo!()
+    input
+        .iter()
+        .map(|machine| solve_joltages(machine).into_iter().sum::<u64>())
+        .sum()
 }
 
 #[cfg(test)]
@@ -121,7 +164,16 @@ mod tests {
     }
 
     #[test]
+    fn part2_examples() {
+        let input = parse(EXAMPLE);
+        assert_eq!(solve_joltages(&input[0]), vec![1, 3, 0, 3, 1, 2]);
+        assert_eq!(solve_joltages(&input[1]), vec![2, 5, 0, 5, 0]);
+        assert_eq!(solve_joltages(&input[2]), vec![5, 0, 5, 1]);
+    }
+
+    #[test]
     fn part2_example() {
-        assert_eq!(part2(&parse(EXAMPLE)), 0);
+        let input = parse(EXAMPLE);
+        assert_eq!(part2(&input), 33);
     }
 }

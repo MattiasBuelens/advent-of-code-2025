@@ -1,0 +1,5 @@
+[env]
+Z3_SYS_Z3_VERSION = "4.15.4"
+Z3_LIBRARY_PATH_OVERRIDE = "C:\\Libraries\\z3-4.15.4-arm64-win\\bin"
+Z3_SYS_Z3_HEADER = "C:\\Libraries\\z3-4.15.4-arm64-win\\include\\z3.h"
+LIBCLANG_PATH = "C:\\Program Files\\LLVM\\bin\\libclang.dll"
