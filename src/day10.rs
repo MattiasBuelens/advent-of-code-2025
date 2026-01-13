@@ -144,7 +144,13 @@ fn solve_joltages(machine: &Machine) -> Vec<u64> {
 fn part2(input: &[Machine]) -> u64 {
     input
         .iter()
-        .map(|machine| solve_joltages(machine).into_iter().sum::<u64>())
+        .enumerate()
+        .map(|(i, machine)| {
+            if i % 10 == 0 {
+                println!("...Machine #{i}");
+            }
+            solve_joltages(machine).into_iter().sum::<u64>()
+        })
         .sum()
 }
 
